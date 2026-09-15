@@ -1,64 +1,86 @@
+//HOME
 import { useState, useRef } from "react";
 
 const ANSWER = "NATURALISMO";
 const CLUE_TEXT =
   "Sovina, brucutu e imoral, no fim não vi nem o b de \"bis\". O cortiço é o começo do movimento literário. (12)";
-
+//Lógica da página
 function App() {
+  // divide a resposta final em palavras e em letras para montar a grade da interface.
   const words = ANSWER.split(" ").map((word) => word.split(""));
+
+  // estado do jogo: guarda a tentativa do usuário por posição de letra.
   const [guess, setGuess] = useState(words.map((word) => word.map(() => "")));
   const [status, setStatus] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
+
+  // guarda referências dos inputs para focar o próximo campo da grade.
   const inputRefs = useRef([]);
 
   function focusInput(wordIndex, letterIndex) {
+    // se o índice da letra ultrapassa o tamanho da palavra, avança para a próxima palavra.
     if (letterIndex >= words[wordIndex].length) {
       const nextWord = wordIndex + 1;
       if (nextWord < words.length) focusInput(nextWord, 0);
       return;
     }
+
     inputRefs.current[wordIndex]?.[letterIndex]?.focus();
   }
 
   function handleChange(wordIndex, letterIndex, value) {
+    // pega apenas a última letra digitada e mantém a entrada em maiúsculas.
     const letter = value.slice(-1).toUpperCase();
+
+    // copia o estado atual para não mutá-lo diretamente.
     const next = guess.map((w) => [...w]);
     next[wordIndex][letterIndex] = letter;
     setGuess(next);
+
+    // reset do status da tentativa para evitar mensagem antiga.
     setStatus(null);
 
+    // move o foco para a próxima casa quando houver letra digitada.
     if (letter) {
       focusInput(wordIndex, letterIndex + 1);
     }
   }
 
-function handleKeyDown(e, wordIndex, letterIndex) {
-  if (e.key === "Enter") {
-    checkAnswer();
-    return;
-  }
+  function handleKeyDown(e, wordIndex, letterIndex) {
+    // tecla Enter dispara a validação da resposta completa.
+    if (e.key === "Enter") {
+      checkAnswer();
+      return;
+    }
 
-  if (e.key === "Backspace" && !guess[wordIndex][letterIndex]) {
-    if (letterIndex > 0) {
-      focusInput(wordIndex, letterIndex - 1);
-    } else if (wordIndex > 0) {
-      focusInput(wordIndex - 1, words[wordIndex - 1].length - 1);
+    // quando o campo está vazio e a pessoa apaga, move o foco para a letra anterior.
+    if (e.key === "Backspace" && !guess[wordIndex][letterIndex]) {
+      if (letterIndex > 0) {
+        focusInput(wordIndex, letterIndex - 1);
+      } else if (wordIndex > 0) {
+        focusInput(wordIndex - 1, words[wordIndex - 1].length - 1);
+      }
     }
   }
-}
 
   function checkAnswer() {
+    // junta as letras preenchidas em cada palavra e compara com a resposta correta.
     const userAnswer = guess.map((w) => w.join("")).join(" ");
     setStatus(userAnswer === ANSWER ? "correct" : "wrong");
   }
 
   function useHint() {
+    // coloca a resposta em um array plano para localizar a próxima letra vazia.
     const flatAnswer = words.flat();
     const flatGuess = guess.flat();
     const nextEmptyIndex = flatGuess.findIndex((l) => l === "");
+
+    // se não houver espaços vazios, não faz nada.
     if (nextEmptyIndex === -1) return;
 
     let count = 0;
+
+    // preenche a próxima letra vazia com a letra correta da solução.
     const next = guess.map((word) =>
       word.map((letter) => {
         if (count === nextEmptyIndex) {
@@ -69,9 +91,10 @@ function handleKeyDown(e, wordIndex, letterIndex) {
         return letter;
       })
     );
+
     setGuess(next);
   }
-
+// interface da página
   return (
     <div className="min-h-screen bg-ink flex flex-col items-center justify-center gap-8 p-6">
       <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 py-5">

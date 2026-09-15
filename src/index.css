@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@theme {
+  --color-ink: #242834;
+  --color-lime: #b6ff00;
+  --color-violet: #7d53ff;
+  --font-serif-riddle: "Lora", serif;
+}

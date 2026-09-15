@@ -8,7 +8,6 @@ function App() {
   const words = ANSWER.split(" ").map((word) => word.split(""));
   const [guess, setGuess] = useState(words.map((word) => word.map(() => "")));
   const [status, setStatus] = useState(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
   const inputRefs = useRef([]);
 
@@ -33,15 +32,20 @@ function App() {
     }
   }
 
-  function handleKeyDown(e, wordIndex, letterIndex) {
-    if (e.key === "Backspace" && !guess[wordIndex][letterIndex]) {
-      if (letterIndex > 0) {
-        focusInput(wordIndex, letterIndex - 1);
-      } else if (wordIndex > 0) {
-        focusInput(wordIndex - 1, words[wordIndex - 1].length - 1);
-      }
+function handleKeyDown(e, wordIndex, letterIndex) {
+  if (e.key === "Enter") {
+    checkAnswer();
+    return;
+  }
+
+  if (e.key === "Backspace" && !guess[wordIndex][letterIndex]) {
+    if (letterIndex > 0) {
+      focusInput(wordIndex, letterIndex - 1);
+    } else if (wordIndex > 0) {
+      focusInput(wordIndex - 1, words[wordIndex - 1].length - 1);
     }
   }
+}
 
   function checkAnswer() {
     const userAnswer = guess.map((w) => w.join("")).join(" ");
@@ -66,7 +70,6 @@ function App() {
       })
     );
     setGuess(next);
-    setHintsUsed((h) => h + 1);
   }
 
   return (
@@ -83,8 +86,8 @@ function App() {
         </button>
       </header>
 
-      <div className="border border-violet rounded-2xl px-8 py-6 max-w-xl text-center bg-white/5">
-        <p className="font-serif-riddle text-zinc-100 text-lg leading-relaxed">
+<div className="border border-violet rounded-2xl px-8 py-6 max-w-xl text-center">
+          <p className="font-serif-riddle text-zinc-100 text-lg leading-relaxed">
           {CLUE_TEXT}
         </p>
       </div>
@@ -115,12 +118,7 @@ function App() {
 
       {status !== "correct" && (
         <div className="flex gap-4">
-          <button
-            onClick={useHint}
-            className="px-5 py-2 rounded-full border border-violet text-violet hover:bg-violet/10 transition-colors"
-          >
-            Dica ({hintsUsed})
-          </button>
+
           <button
             onClick={checkAnswer}
             className="px-6 py-2 rounded-full bg-lime text-ink font-semibold hover:brightness-110 transition"
@@ -136,7 +134,6 @@ function App() {
 
       {status === "correct" && (
         <div className="animate-pop-in border-2 border-lime rounded-2xl px-8 py-6 bg-lime/10 text-center max-w-md">
-          <p className="text-4xl mb-2">🎉</p>
           <p className="text-lime text-xl font-semibold">
             Isso mesmo, é NATURALISMO!
           </p>
@@ -163,7 +160,7 @@ function App() {
             </button>
             <h2 className="text-white text-xl font-bold mb-4">Como jogar</h2>
             <p className="text-zinc-300 mb-4">
-              Nosso enigma é um quebra-cabeça linguístico, onde as palavras
+              O é um quebra-cabeça linguístico, onde as palavras
               da frase escondem instruções de como montar a resposta final.
             </p>
             <p className="text-zinc-300 mb-2">
@@ -172,7 +169,7 @@ function App() {
             <ul className="text-zinc-300 space-y-2 mb-4">
               <li>
                 <span className="text-violet font-semibold">Indicadores</span>:
-                palavras que dizem o que fazer — pegar o começo, o fim,
+                palavras que dizem o que fazer: pegar o começo, o fim,
                 remover uma letra, etc.
               </li>
               <li>

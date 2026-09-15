@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const ANSWER = "NATURALISMO";
 const CLUE_TEXT =
-  "Sovina, brucutu e imoral, no fim não vi nem o b de \"bis\". O cortiço é o começo do movimento. (12)";
+  "Sovina, brucutu e imoral, no fim não vi nem o b de \"bis\". O cortiço é o começo do movimento literário. (12)";
 
 function App() {
   const words = ANSWER.split(" ").map((word) => word.split(""));
@@ -10,6 +10,16 @@ function App() {
   const [status, setStatus] = useState(null);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
+  const inputRefs = useRef([]);
+
+  function focusInput(wordIndex, letterIndex) {
+    if (letterIndex >= words[wordIndex].length) {
+      const nextWord = wordIndex + 1;
+      if (nextWord < words.length) focusInput(nextWord, 0);
+      return;
+    }
+    inputRefs.current[wordIndex]?.[letterIndex]?.focus();
+  }
 
   function handleChange(wordIndex, letterIndex, value) {
     const letter = value.slice(-1).toUpperCase();
@@ -17,6 +27,20 @@ function App() {
     next[wordIndex][letterIndex] = letter;
     setGuess(next);
     setStatus(null);
+
+    if (letter) {
+      focusInput(wordIndex, letterIndex + 1);
+    }
+  }
+
+  function handleKeyDown(e, wordIndex, letterIndex) {
+    if (e.key === "Backspace" && !guess[wordIndex][letterIndex]) {
+      if (letterIndex > 0) {
+        focusInput(wordIndex, letterIndex - 1);
+      } else if (wordIndex > 0) {
+        focusInput(wordIndex - 1, words[wordIndex - 1].length - 1);
+      }
+    }
   }
 
   function checkAnswer() {
@@ -71,38 +95,55 @@ function App() {
             {word.map((_, letterIndex) => (
               <input
                 key={letterIndex}
+                ref={(el) => {
+                  if (!inputRefs.current[wordIndex]) inputRefs.current[wordIndex] = [];
+                  inputRefs.current[wordIndex][letterIndex] = el;
+                }}
                 maxLength={1}
+                disabled={status === "correct"}
                 value={guess[wordIndex][letterIndex]}
                 onChange={(e) =>
                   handleChange(wordIndex, letterIndex, e.target.value)
                 }
-                className="w-11 h-12 text-center text-xl uppercase bg-ink border border-violet rounded-md text-white focus:outline-none focus:border-lime transition-colors"
+                onKeyDown={(e) => handleKeyDown(e, wordIndex, letterIndex)}
+                className="w-11 h-12 text-center text-xl uppercase bg-ink border border-violet rounded-md text-white focus:outline-none focus:border-lime transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               />
             ))}
           </div>
         ))}
       </div>
 
-      <div className="flex gap-4">
-        <button
-          onClick={useHint}
-          className="px-5 py-2 rounded-full border border-violet text-violet hover:bg-violet/10 transition-colors"
-        >
-          Dica ({hintsUsed})
-        </button>
-        <button
-          onClick={checkAnswer}
-          className="px-6 py-2 rounded-full bg-lime text-ink font-semibold hover:brightness-110 transition"
-        >
-          Conferir
-        </button>
-      </div>
-
-      {status === "correct" && (
-        <p className="text-lime text-lg font-semibold">Certinho! 🎉</p>
+      {status !== "correct" && (
+        <div className="flex gap-4">
+          <button
+            onClick={useHint}
+            className="px-5 py-2 rounded-full border border-violet text-violet hover:bg-violet/10 transition-colors"
+          >
+            Dica ({hintsUsed})
+          </button>
+          <button
+            onClick={checkAnswer}
+            className="px-6 py-2 rounded-full bg-lime text-ink font-semibold hover:brightness-110 transition"
+          >
+            Conferir
+          </button>
+        </div>
       )}
+
       {status === "wrong" && (
         <p className="text-red-400 text-lg">Ainda não é isso, tenta de novo.</p>
+      )}
+
+      {status === "correct" && (
+        <div className="animate-pop-in border-2 border-lime rounded-2xl px-8 py-6 bg-lime/10 text-center max-w-md">
+          <p className="text-4xl mb-2">🎉</p>
+          <p className="text-lime text-xl font-semibold">
+            Isso mesmo, é NATURALISMO!
+          </p>
+          <p className="text-zinc-300 text-sm mt-2">
+            O Cortiço é uma das obras que inaugura o movimento no Brasil.
+          </p>
+        </div>
       )}
 
       {showHelp && (

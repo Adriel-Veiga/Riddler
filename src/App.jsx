@@ -121,7 +121,6 @@ function App() {
 
       {status === "correct" && (
         <div className="animate-pop-in border-2 border-lime rounded-2xl px-8 py-6 bg-lime/10 text-center max-w-md">
-          <p className="text-4xl mb-2">🎉</p>
           <p className="text-lime text-xl font-semibold">
             Isso mesmo, é NATURALISMO!
           </p>
@@ -148,7 +147,7 @@ function App() {
             </button>
             <h2 className="text-white text-xl font-bold mb-4">Como jogar</h2>
             <p className="text-zinc-300 mb-4">
-              Nosso enigma é um quebra-cabeça linguístico, onde as palavras
+              Esse enigma é um quebra-cabeça linguístico inspirada no https://enigmati.co/! Onde as palavras
               da frase escondem instruções de como montar a resposta final.
             </p>
             <p className="text-zinc-300 mb-2">

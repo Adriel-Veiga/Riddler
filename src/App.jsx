@@ -101,12 +101,6 @@ function App() {
       {status !== "correct" && (
         <div className="flex gap-4">
           <button
-            onClick={useHint}
-            className="px-5 py-2 rounded-full border border-violet text-violet hover:bg-violet/10 transition-colors"
-          >
-            Dica ({hintsUsed})
-          </button>
-          <button
             onClick={checkAnswer}
             className="px-6 py-2 rounded-full bg-lime text-ink font-semibold hover:brightness-110 transition"
           >
